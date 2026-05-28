@@ -65,38 +65,21 @@
     justify-content: center;
     gap: 10px;
     transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
   }
 
-  .toggle-btn:active {
-    transform: scale(0.97);
-  }
+  .toggle-btn:active { transform: scale(0.97); }
+  .toggle-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .toggle-btn svg {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
-    transition: transform 0.3s ease;
   }
 
-  .toggle-btn.available {
-    background: #e8f5e9;
-    color: #2e7d32;
-  }
-
-  .toggle-btn.available:hover {
-    background: #dcedc8;
-  }
-
-  .toggle-btn.busy {
-    background: #fce4ec;
-    color: #c62828;
-  }
-
-  .toggle-btn.busy:hover {
-    background: #f8bbd0;
-  }
+  .toggle-btn.available { background: #e8f5e9; color: #2e7d32; }
+  .toggle-btn.available:hover { background: #dcedc8; }
+  .toggle-btn.busy { background: #fce4ec; color: #c62828; }
+  .toggle-btn.busy:hover { background: #f8bbd0; }
 
   .status-pill {
     display: inline-flex;
@@ -107,18 +90,10 @@
     padding: 5px 12px;
     border-radius: 20px;
     margin-top: 1rem;
-    transition: all 0.2s ease;
   }
 
-  .status-pill.available {
-    background: #e8f5e9;
-    color: #388e3c;
-  }
-
-  .status-pill.busy {
-    background: #fce4ec;
-    color: #c62828;
-  }
+  .status-pill.available { background: #e8f5e9; color: #388e3c; }
+  .status-pill.busy { background: #fce4ec; color: #c62828; }
 
   .status-dot {
     width: 7px;
@@ -140,7 +115,6 @@
     color: #aaa;
     margin-top: 1rem;
     min-height: 16px;
-    transition: opacity 0.3s;
   }
 
   .spinner {
@@ -153,9 +127,7 @@
     animation: spin 0.7s linear infinite;
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -184,39 +156,35 @@
   <div class="feedback" id="feedback"></div>
 </div>
 
-<script src="//api.bitrix24.com/api/v1/"></script>
 <script>
-const PORTAL = 'actium24.bitrix24.eu';
+const WEBHOOK = 'https://actium24.bitrix24.eu/rest/969/2ht1acnnwyj55wku/';
 let isBusy = false;
 let isLoading = false;
 
-const ICONS = {
-  available: `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l1.41-1.41a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>`,
-  busy: `<line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 4.69 2 2m16.45 16.45L21 21M10.75 6.71a10 10 0 0 1 8.56 8.06M2 10a10 10 0 0 0 10 10c.35 0 .69-.02 1.03-.06"/>`
-};
+const ICON_AVAILABLE = `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l1.41-1.41a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>`;
+const ICON_BUSY = `<line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 4.69 2 2m16.45 16.45L21 21M10.75 6.71a10 10 0 0 1 8.56 8.06M2 10a10 10 0 0 0 10 10c.35 0 .69-.02 1.03-.06"/>`;
 
-function callBX(method, params) {
-  return new Promise((resolve, reject) => {
-    BX24.callMethod(method, params, function(result) {
-      if (result.error()) reject(result.error());
-      else resolve(result.data());
-    });
+async function callWebhook(method, params = {}) {
+  const url = WEBHOOK + method + '.json';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
   });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error_description || data.error);
+  return data.result;
 }
 
 function setLoading(val) {
   isLoading = val;
-  const spinner = document.getElementById('spinner');
-  const icon = document.getElementById('btnIcon');
-  spinner.style.display = val ? 'block' : 'none';
-  icon.style.display = val ? 'none' : 'block';
+  document.getElementById('spinner').style.display = val ? 'block' : 'none';
+  document.getElementById('btnIcon').style.display = val ? 'none' : 'block';
   document.getElementById('toggleBtn').disabled = val;
 }
 
-function setFeedback(msg, duration = 3000) {
-  const el = document.getElementById('feedback');
-  el.textContent = msg;
-  if (duration) setTimeout(() => { el.textContent = ''; }, duration);
+function setFeedback(msg) {
+  document.getElementById('feedback').textContent = msg;
 }
 
 function applyState() {
@@ -226,14 +194,14 @@ function applyState() {
 
   if (isBusy) {
     btn.className = 'toggle-btn busy';
-    document.getElementById('btnIcon').innerHTML = ICONS.busy;
+    document.getElementById('btnIcon').innerHTML = ICON_BUSY;
     document.getElementById('btnText').textContent = 'No molestar';
     pill.className = 'status-pill busy';
     dot.className = 'status-dot busy';
     document.getElementById('statusText').textContent = 'Llamadas bloqueadas';
   } else {
     btn.className = 'toggle-btn available';
-    document.getElementById('btnIcon').innerHTML = ICONS.available;
+    document.getElementById('btnIcon').innerHTML = ICON_AVAILABLE;
     document.getElementById('btnText').textContent = 'Disponible';
     pill.className = 'status-pill available';
     dot.className = 'status-dot available';
@@ -241,49 +209,37 @@ function applyState() {
   }
 }
 
-function toggleDND() {
+async function toggleDND() {
   if (isLoading) return;
   setLoading(true);
   setFeedback('');
 
-  const newBusy = !isBusy;
-
-  BX24.callMethod('im.status.set', {
-    STATUS: newBusy ? 'dnd' : 'online'
-  }, function(res) {
-    if (res.error()) {
-      console.error('im.status.set error:', res.error());
-      setFeedback('Error: ' + JSON.stringify(res.error()));
-      setLoading(false);
-    } else {
-      isBusy = newBusy;
-      applyState();
-      setFeedback(isBusy ? 'Llamadas desactivadas' : 'Llamadas activadas');
-      setLoading(false);
-    }
-  });
+  try {
+    const newBusy = !isBusy;
+    await callWebhook('im.status.set', { STATUS: newBusy ? 'dnd' : 'online' });
+    isBusy = newBusy;
+    applyState();
+    setFeedback(isBusy ? 'Llamadas desactivadas' : 'Llamadas activadas');
+  } catch (err) {
+    console.error(err);
+    setFeedback('Error: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
 }
 
-BX24.init(function() {
-  BX24.init(function() {
-  BX24.callMethod('scope', {}, function(res) {
-    if (!res.error()) {
-      document.getElementById('feedback').textContent = JSON.stringify(res.data());
-    } else {
-      document.getElementById('feedback').textContent = 'Error: ' + JSON.stringify(res.error());
-    }
-  });
-});
-    if (!res.error()) {
-      const data = res.data();
-      console.log('im.status.get data:', JSON.stringify(data));
-      isBusy = (data === 'dnd');
-      applyState();
-    } else {
-      console.error('im.status.get error:', res.error());
-    }
-  });
-});
+async function init() {
+  try {
+    const result = await callWebhook('im.status.get');
+    isBusy = (result === 'dnd');
+    applyState();
+  } catch (err) {
+    console.error('init error:', err);
+    setFeedback('Error al cargar estado: ' + err.message);
+  }
+}
+
+init();
 </script>
 </body>
 </html>
