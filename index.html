@@ -6,9 +6,7 @@
 <title>Estado de llamadas</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'DM Sans', sans-serif;
     background: #f5f4f1;
@@ -18,7 +16,6 @@
     justify-content: center;
     padding: 1.5rem;
   }
-
   .card {
     background: #ffffff;
     border-radius: 16px;
@@ -28,7 +25,6 @@
     border: 1px solid #e8e6e0;
     text-align: center;
   }
-
   .card-header {
     display: flex;
     align-items: center;
@@ -36,13 +32,7 @@
     gap: 8px;
     margin-bottom: 1.75rem;
   }
-
-  .card-header svg {
-    width: 18px;
-    height: 18px;
-    color: #888;
-  }
-
+  .card-header svg { width: 18px; height: 18px; color: #888; }
   .card-header span {
     font-size: 13px;
     font-weight: 500;
@@ -50,7 +40,6 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
-
   .toggle-btn {
     width: 100%;
     padding: 1rem 1.25rem;
@@ -66,21 +55,13 @@
     gap: 10px;
     transition: all 0.2s ease;
   }
-
   .toggle-btn:active { transform: scale(0.97); }
   .toggle-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-  .toggle-btn svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
-
+  .toggle-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
   .toggle-btn.available { background: #e8f5e9; color: #2e7d32; }
   .toggle-btn.available:hover { background: #dcedc8; }
   .toggle-btn.busy { background: #fce4ec; color: #c62828; }
   .toggle-btn.busy:hover { background: #f8bbd0; }
-
   .status-pill {
     display: inline-flex;
     align-items: center;
@@ -91,47 +72,25 @@
     border-radius: 20px;
     margin-top: 1rem;
   }
-
   .status-pill.available { background: #e8f5e9; color: #388e3c; }
   .status-pill.busy { background: #fce4ec; color: #c62828; }
-
-  .status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .status-dot.available { background: #43a047; }
   .status-dot.busy { background: #e53935; animation: pulse 1.5s infinite; }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .feedback {
-    font-size: 12px;
-    color: #aaa;
-    margin-top: 1rem;
-    min-height: 16px;
-  }
-
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .feedback { font-size: 12px; color: #aaa; margin-top: 1rem; min-height: 16px; }
   .spinner {
     display: none;
-    width: 16px;
-    height: 16px;
+    width: 16px; height: 16px;
     border: 2px solid transparent;
     border-top-color: currentColor;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
-
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-
 <div class="card">
   <div class="card-header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -139,7 +98,7 @@
     </svg>
     <span>Estado de llamadas</span>
   </div>
-
+ 
   <button id="toggleBtn" class="toggle-btn available" onclick="toggleDND()">
     <span class="spinner" id="spinner"></span>
     <svg id="btnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -147,23 +106,24 @@
     </svg>
     <span id="btnText">Disponible</span>
   </button>
-
+ 
   <div id="statusPill" class="status-pill available">
     <span class="status-dot available" id="statusDot"></span>
     <span id="statusText">Recibiendo llamadas</span>
   </div>
-
+ 
   <div class="feedback" id="feedback"></div>
 </div>
-
+ 
 <script>
-const WEBHOOK = 'https://actium24.bitrix24.eu/rest/969/2ht1acnnwyj55wku/';
+const WEBHOOK = 'https://actium24.bitrix24.eu/rest/969/jti6f0982p3ovyg9/';
+const USER_ID = '969';
 let isBusy = false;
 let isLoading = false;
-
+ 
 const ICON_AVAILABLE = `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.85a16 16 0 0 0 6.29 6.29l1.41-1.41a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>`;
 const ICON_BUSY = `<line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 4.69 2 2m16.45 16.45L21 21M10.75 6.71a10 10 0 0 1 8.56 8.06M2 10a10 10 0 0 0 10 10c.35 0 .69-.02 1.03-.06"/>`;
-
+ 
 async function callWebhook(method, params = {}) {
   const url = WEBHOOK + method + '.json';
   const res = await fetch(url, {
@@ -175,23 +135,22 @@ async function callWebhook(method, params = {}) {
   if (data.error) throw new Error(data.error_description || data.error);
   return data.result;
 }
-
+ 
 function setLoading(val) {
   isLoading = val;
   document.getElementById('spinner').style.display = val ? 'block' : 'none';
   document.getElementById('btnIcon').style.display = val ? 'none' : 'block';
   document.getElementById('toggleBtn').disabled = val;
 }
-
+ 
 function setFeedback(msg) {
   document.getElementById('feedback').textContent = msg;
 }
-
+ 
 function applyState() {
   const btn = document.getElementById('toggleBtn');
   const dot = document.getElementById('statusDot');
   const pill = document.getElementById('statusPill');
-
   if (isBusy) {
     btn.className = 'toggle-btn busy';
     document.getElementById('btnIcon').innerHTML = ICON_BUSY;
@@ -208,37 +167,38 @@ function applyState() {
     document.getElementById('statusText').textContent = 'Recibiendo llamadas';
   }
 }
-
+ 
 async function toggleDND() {
   if (isLoading) return;
   setLoading(true);
   setFeedback('');
-
   try {
     const newBusy = !isBusy;
-    await callWebhook('im.status.set', { STATUS: newBusy ? 'dnd' : 'online' });
+    await callWebhook('user.update', {
+      ID: USER_ID,
+      STATUS: newBusy ? 'dnd' : 'online'
+    });
     isBusy = newBusy;
     applyState();
     setFeedback(isBusy ? 'Llamadas desactivadas' : 'Llamadas activadas');
   } catch (err) {
-    console.error(err);
     setFeedback('Error: ' + err.message);
   } finally {
     setLoading(false);
   }
 }
-
+ 
 async function init() {
   try {
-    const result = await callWebhook('im.status.get');
-    isBusy = (result === 'dnd');
+    const result = await callWebhook('user.get', { ID: USER_ID });
+    const user = Array.isArray(result) ? result[0] : result;
+    isBusy = (user.STATUS === 'dnd');
     applyState();
   } catch (err) {
-    console.error('init error:', err);
-    setFeedback('Error al cargar estado: ' + err.message);
+    setFeedback('Error al cargar: ' + err.message);
   }
 }
-
+ 
 init();
 </script>
 </body>
