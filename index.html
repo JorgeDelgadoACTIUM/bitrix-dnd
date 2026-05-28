@@ -265,7 +265,15 @@ function toggleDND() {
 }
 
 BX24.init(function() {
-  BX24.callMethod('im.status.get', {}, function(res) {
+  BX24.init(function() {
+  BX24.callMethod('scope', {}, function(res) {
+    if (!res.error()) {
+      document.getElementById('feedback').textContent = JSON.stringify(res.data());
+    } else {
+      document.getElementById('feedback').textContent = 'Error: ' + JSON.stringify(res.error());
+    }
+  });
+});
     if (!res.error()) {
       const data = res.data();
       console.log('im.status.get data:', JSON.stringify(data));
