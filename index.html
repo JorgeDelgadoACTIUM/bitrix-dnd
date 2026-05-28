@@ -241,32 +241,20 @@ function applyState() {
   }
 }
 
-async function toggleDND() {
+function toggleDND() {
   if (isLoading) return;
   setLoading(true);
   setFeedback('');
 
   const newBusy = !isBusy;
 
-  BX24.callMethod('user.update', {
+  BX24.callMethod('im.status.set', {
     STATUS: newBusy ? 'dnd' : 'online'
   }, function(res) {
     if (res.error()) {
-      const errData = res.error();
-      console.error('user.update error:', errData);
-      BX24.callMethod('profile.update', {
-        STATUS: newBusy ? 'dnd' : 'online'
-      }, function(res2) {
-        if (res2.error()) {
-          console.error('profile.update error:', res2.error());
-          setFeedback('Error: ' + JSON.stringify(res2.error()));
-        } else {
-          isBusy = newBusy;
-          applyState();
-          setFeedback(isBusy ? 'Llamadas desactivadas' : 'Llamadas activadas');
-        }
-        setLoading(false);
-      });
+      console.error('im.status.set error:', res.error());
+      setFeedback('Error: ' + JSON.stringify(res.error()));
+      setLoading(false);
     } else {
       isBusy = newBusy;
       applyState();
@@ -277,14 +265,14 @@ async function toggleDND() {
 }
 
 BX24.init(function() {
-  BX24.callMethod('user.current', {}, function(res) {
+  BX24.callMethod('im.status.get', {}, function(res) {
     if (!res.error()) {
       const data = res.data();
-      console.log('user.current data:', JSON.stringify(data));
-      isBusy = (data.STATUS === 'dnd');
+      console.log('im.status.get data:', JSON.stringify(data));
+      isBusy = (data === 'dnd');
       applyState();
     } else {
-      console.error('user.current error:', res.error());
+      console.error('im.status.get error:', res.error());
     }
   });
 });
